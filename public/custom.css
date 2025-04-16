@@ -170,6 +170,15 @@ body.dark-mode div[id="user-info-popup"] button {
   left: -50% !important;
 }
 
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+
 
 .title_home_page {
   background: linear-gradient(145deg, #6a11cb, #2575fc); /* Vibrant gradient background */
