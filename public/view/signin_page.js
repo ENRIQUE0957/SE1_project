@@ -1,10 +1,10 @@
 import { root } from "./elements.js";
-import { signinFirebase  } from "../controller/firebase_auth.js";
+import { signinFirebase } from "../controller/firebase_auth.js";
 import { onClickCreateUser } from "../controller/signin_controller.js";
 
 export async function signinPageView() {
     const response = await fetch('/view/templates/signin_page_template.html',
-        {cache: 'no-store'}
+        { cache: 'no-store' }
     );
 
     const divWrapper = document.createElement('div'); // <div></div>

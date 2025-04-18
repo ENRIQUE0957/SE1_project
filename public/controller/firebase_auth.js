@@ -12,8 +12,11 @@ import { homePageView } from "../view/home_page.js";
 import { signinPageView } from "../view/signin_page.js";
 import { routePathnames, routing } from "../controller/route_controller.js";
 import { userInfo } from "../view/elements.js";
+import { auth } from "../firebase/firebaseConfig.js";
 
-const auth = getAuth(app);
+
+
+
 const db = getFirestore(app); // Initialize Firestore
 
 export let currentUser = null;
@@ -23,15 +26,25 @@ export async function signinFirebase(e) {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
-
+  
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        if (DEV) console.log("Signed in successfully:", userCredential.user);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      currentUser = userCredential.user;
+  
+      if (DEV) console.log("Signed in successfully:", currentUser);
+  
+      // Manually trigger routing to home after login
+      const pathname = window.location.pathname;
+      const hash = "#/home";
+      history.pushState(null, null, pathname + hash);
+      routing(pathname, hash);
+  
     } catch (error) {
-        if (DEV) console.log("Signin error:", error);
-        alert('Signin Error: ' + error.message);
+      if (DEV) console.log("Signin error:", error);
+      alert('Signin Error: ' + error.message);
     }
-}
+  }
+  
 
 // Handle user sign-out
 export async function signOutFirebase() {
@@ -53,7 +66,7 @@ export function attachAuthStateChangeObserver() {
 function onAuthStateChangedListener(user) {
     currentUser = user;
     if (user) {
-        userInfo.textContent = 'Settings'; // Always display 'Settings' when signed in
+        userInfo.textContent = user.displayName || user.email || "User";
         const postAuth = document.getElementsByClassName('myclass-postauth');
         for (let i = 0; i < postAuth.length; i++) {
             postAuth[i].classList.replace('d-none', 'd-block');
@@ -81,17 +94,18 @@ function onAuthStateChangedListener(user) {
 }
 
 // Function to create a new user
-export async function createNewUser(email, password) {
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        console.log('User created successfully:', userCredential.user);
-        // You can add additional logic here, like saving user information to Firestore
-        return userCredential.user;
-    } catch (error) {
-        console.error('Error creating new user:', error.code, error.message);
-        throw error;
-    }
+
+
+export async function createNewUser(email, password, displayName) {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  currentUser = userCredential.user;
+
+  // 🆕 Set display name on Firebase Auth profile
+  if (displayName) {
+    await updateProfile(currentUser, { displayName });
+  }
 }
+
 
 // Function to update the user's email
 export async function updateUserEmail(newEmail) {

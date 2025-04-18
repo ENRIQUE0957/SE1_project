@@ -1,82 +1,73 @@
-import { 
-    getFirestore,
-    collection,
-    addDoc,
-    query,
-    where,
-    orderBy,
-    getDocs,
-    updateDoc,
-    deleteDoc,
-    doc,
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
+import {
+   getFirestore,
+   collection,
+   addDoc,
+   getDocs,
+   query,
+   where,
+   orderBy,
+   updateDoc,
+   deleteDoc,
+   doc,
+   Timestamp,
+ } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+ 
+ import { app } from "./firebase_core.js";
+ import { Task } from "../model/Task.js";
+ import { db } from "../firebase/firebaseConfig.js";
 
-import { app } from "./firebase_core.js";
-import { ToDoItem } from "../model/ToDoItem.js";
-import { ToDoTitle } from "../model/ToDoTitle.js";
 
+ const TASKS_COLLECTION = 'tasks';
 
-const db = getFirestore(app);
-const TODO_TITLE_COLLECTION = 'todo_titles';
-const TODO_ITEM_COLLECTION = 'todo_items';
+export async function getToDoTitleList(userId) {
+  const titleList = [];
+  const q = query(collection(db, "ToDo"), where("owner", "==", userId));
+  const snapshot = await getDocs(q);
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    titleList.push({
+      title: data.taskTitle,
+      dueDate: data.dueDate?.toDate?.() || null
+    });
+  });
+  return titleList;
+}
 
-export async function addToDoTitle(todoTitle) {
-   const docRef = await addDoc(collection(db, TODO_TITLE_COLLECTION), todoTitle.toFirestore());
+ 
+ export async function addTask(taskData) {
+   taskData.createdAt = Timestamp.fromDate(new Date(taskData.createdAt));
+   taskData.updatedAt = Timestamp.fromDate(new Date(taskData.updatedAt));
+   taskData.dueDate = Timestamp.fromDate(new Date(taskData.dueDate));
+ 
+   const docRef = await addDoc(collection(db, TASKS_COLLECTION), taskData);
    return docRef.id;
-}
-
-export async function addToDoItem(todoItem) {
-    const docRef = await addDoc(collection(db, TODO_ITEM_COLLECTION), todoItem.toFirestore());
-    return docRef.id;
  }
-
- export async function getToDoItemList(titleDocId, uid) {
-    let itemList = [];
-    const q = query(collection(db, TODO_ITEM_COLLECTION),
-    where('uid', '==', uid), 
-    where('titleId', '==', titleDocId), 
-    orderBy('timestamp'),
-    );
-    const snapShot = await getDocs(q);
-    snapShot.forEach(doc => {
-        const item = new ToDoItem(doc.data(), doc.id);
-        itemList.push(item);
-    });
-    return itemList;
+ 
+ export async function getTaskList(userId) {
+   const taskList = [];
+   const q = query(
+     collection(db, TASKS_COLLECTION),
+     where("userId", "==", userId),
+     orderBy("dueDate", "asc")
+   );
+ 
+   const snapShot = await getDocs(q);
+   snapShot.forEach((docSnap) => {
+     const task = new Task(docSnap.data(), docSnap.id);
+     taskList.push(task);
+   });
+ 
+   return taskList;
  }
-
- export async function getToDoTitleList(uid) {
-    let titleList = [];
-    const q = query(collection(db, TODO_TITLE_COLLECTION),
-        where('uid', '==', uid),
-        orderBy('timestamp', 'desc')
-    );
-
-    const snapShot = await getDocs(q);
-    snapShot.forEach(doc => {
-        const t = new ToDoTitle(doc.data(), doc.id);
-        titleList.push(t);
-    });
-
-    return titleList;
+ 
+ export async function updateTask(docId, updateObj) {
+   updateObj.updatedAt = Timestamp.now();
+   const docRef = doc(db, TASKS_COLLECTION, docId);
+   await updateDoc(docRef, updateObj);
  }
-
- export async function updateToDoItem(docId, update) {
-    const docRef = doc(db, TODO_ITEM_COLLECTION, docId);
-    await updateDoc(docRef, update);
+ 
+ export async function deleteTask(docId) {
+   const docRef = doc(db, TASKS_COLLECTION, docId);
+   await deleteDoc(docRef);
  }
-
- export async function deleteToDoItem(itemId) {
-    const docRef = doc(db, TODO_ITEM_COLLECTION, itemId);
-    await deleteDoc(docRef);
- }
-
- export async function getAllToDoTitles(uid) {
-   const db = getFirestore();
-   const titlesCollection = collection(db, "todoTitles");
-   const snapshot = await getDocs(titlesCollection);
-   const titles = snapshot.docs
-       .map((doc) => ({ docId: doc.id, ...doc.data() }))
-       .filter((title) => title.uid === uid); // Filter by user ID
-   return titles;
-}
+ 

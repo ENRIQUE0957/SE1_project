@@ -1,147 +1,111 @@
 import { DEV } from "../model/constants.js";
-import { ToDoTitle } from "../model/ToDoTitle.js";
+import { Task } from "../model/Task.js";
 import { currentUser } from "./firebase_auth.js";
-import { addToDoTitle, deleteToDoItem, getToDoItemList, updateToDoItem } from "./firestore_controller.js";
+import { addTask, updateTask } from "./firestore_controller.js";
 import { progressMessage } from "../view/progress_message.js";
-import { buildCard, buildCardText, createToDoItemElement } from "../view/home_page.js";
-import { ToDoItem } from "../model/ToDoItem.js";
-import { addToDoItem } from "./firestore_controller.js";
+import { buildCard } from "../view/home_page.js";
 
-export async function onSubmitCreateForm(e) {
+
+// Placeholder for expand button functionality
+export function onClickExpandButton(e) {
+  const container = e.target.closest(".card-body");
+  const notes = container.querySelector(".card-text:nth-of-type(3)");
+  if (notes) {
+    notes.classList.toggle("d-none");
+  }
+}
+
+export function onKeyDownNewItemInput(e) {
+  if (e.key === "Enter") {
     e.preventDefault();
-    const title = e.target.title.value;
-    const uid = currentUser.uid;
-    const timestamp = Date.now();
-    const todoTitle = new ToDoTitle({title, uid, timestamp});
-
-    const progress = progressMessage('Creating...');
-    e.target.prepend(progress);
-
-    let docId;
-    try {
-        docId = await addToDoTitle(todoTitle);
-        todoTitle.set_docId(docId);
-    } catch (e){
-        if (DEV) console.log('failed to create: ', e);
-        alert('Failed to creat: ' + JSON.stringify(e));
-        progress.remove();
-        return;
-    }
-    progress.remove();
-
-    const container = document.getElementById('todo-container');
-    container.prepend(buildCard(todoTitle));
-    e.target.title.value = '';
+    const form = e.target.form;
+    if (form) form.dispatchEvent(new Event("submit"));
+  }
 }
 
-export async function onClickExpandButton(e) {
-    const button = e.target;
-    const cardBody = button.parentElement;
-    if (button.textContent == '+') {
-        const cardText = cardBody.querySelector('.card-text');
-        if (!cardText) {
-            // read all existing todoItems
-            const progress = progressMessage('Loading item list...');
-            button.parentElement.prepend(progress);
-            let itemList;
-            try{
-                itemList = await getToDoItemList(cardBody.id, currentUser.uid);
-            } catch(e) {
-                if (DEV) console.log('failed to get item list', e);
-                alert('Failed to get item list: ' + JSON.stringify(e));
-                progress.remove();
-                return;
-            }
-            progress.remove();
-
-            cardBody.appendChild(buildCardText(cardBody.id, itemList)); //titleDocId
-        } else {
-            cardText.classList.replace('d-none', 'd-block');
-        }
-        button.textContent = '-';
-    } else {
-        const cardText= cardBody.querySelector('.card-text');
-        cardText.classList.replace('d-block', 'd-none');
-        button.textContent = '+';
-    }
-}
-
-export async function onKeyDownNewItemInput(e, titleDocId) {
-    if (e.key != "Enter") return;
-    const content = e.target.value;
-    const titleId = titleDocId;
-    const uid = currentUser.uid;
-    const timestamp = Date.now();
-    const todoItem = new ToDoItem({
-        titleId, uid, content, timestamp,
-    });
-
-    const progress = progressMessage('Adding item...');
-    e.target.parentElement.prepend(progress);
-    try {
-        const docId = await addToDoItem(todoItem);
-        todoItem.set_docId(docId);
-    } catch(e) {
-        if (DEV) console.log('Failed to add item,', e);
-        alert('Failed to save ToD0 Item ' + JSON.stringify(e));
-        progress.remove();
-        return;
-    }
-
-    progress.remove();
-
-    const li = createToDoItemElement(todoItem);
-    const cardBody = document.getElementById(e.target.id.substring(5));
-    cardBody.querySelector('ul').appendChild(li);
-    e.target.value = '';
-}
-
-export function onMouseOverItem(e) {
-    const span = e.currentTarget.children[0];
-    const input = e.currentTarget.children[1];
-    span.classList.replace('d-block', 'd-none');
-    input.classList.replace('d-none', 'd-block');
+export function onKeyDownUpdateItem(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const form = e.target.form;
+    if (form) form.dispatchEvent(new Event("submit"));
+  }
 }
 
 export function onMouseOutItem(e) {
-    const span = e.currentTarget.children[0];
-    const input = e.currentTarget.children[1];
-    input.value = span.textContent; //reset if changed without saving
-    span.classList.replace('d-none', 'd-block');
-    input.classList.replace('d-block', 'd-none');
+  // Example: blur the input when mouse leaves the area
+  if (e.target && typeof e.target.blur === 'function') {
+    e.target.blur();
+  }
 }
 
-export async function onKeyDownUpdateItem(e) {
-    if (e.key != 'Enter') return;
+export function onMouseOverItem(e) {
+  if (e.target) {
+    e.target.style.backgroundColor = "#f8f9fa"; // Light gray hover effect
+  }
+}
 
-    const li = e.target.parentElement;
-    const progress = progressMessage('Updating...');
-    li.parentElement.prepend(progress);
 
-    const content = e.target.value.trim();
-    if(content.length == 0) {
-        // delete the item if empty
-        try {
-            await deleteToDoItem(li.id);
-            li.remove();
-        } catch(e) {
-            if (DEV) console.log('failed to delete', e);
-            alert('Failed to delete: ' + JSON.stringify(e));
-        }
-    } else{
-        //update the item
-        const update = {content};
-        try {
-            await updateToDoItem(li.id, update);
-            const span = li.children[0];
-            span.textContent = content;
-            const input = li.children[1];
-            input.value = content;
-        } catch (e) {
-            if (DEV) console.log('failed to update', e);
-            alert('Failed to update: ' + JSON.stringify(e));
-        }
+
+
+
+export async function onSubmitCreateForm(e) {
+  e.preventDefault();
+
+  const form = e.target;
+
+  const taskTitle = form.title.value.trim();
+  const category = form.category.value || 'General';
+  const categoryColor = form.categoryColor.value || '#000000';
+  const dueDateValue = form.dueDate.value;
+  const notes = form.notes.value || '';
+  const isCompleted = form.isCompleted.checked;
+  const docId = form["docId"].value;
+
+  if (!taskTitle || !dueDateValue) {
+    alert("Task title and due date are required.");
+    return;
+  }
+
+  const userId = currentUser.uid;
+  const createdAt = new Date();
+  const updatedAt = new Date();
+  const dueDate = new Date(dueDateValue);
+
+  const taskData = {
+    taskTitle,
+    userId,
+    content: notes,
+    createdAt,
+    updatedAt,
+    dueDate,
+    category,
+    categoryColor,
+    isCompleted,
+    notes,
+  };
+
+  const progress = progressMessage(docId ? "Updating task..." : "Creating task...");
+  form.prepend(progress);
+
+  try {
+    let task;
+    if (docId) {
+      await updateTask(docId, taskData);
+      task = new Task({ ...taskData }, docId);
+    } else {
+      const newDocId = await addTask(taskData);
+      task = new Task({ ...taskData }, newDocId);
     }
 
-    progress.remove();
+    const container = document.getElementById("todo-container");
+    container.prepend(buildCard(task));
+
+    form.reset();
+    form["docId"].value = "";
+  } catch (e) {
+    if (DEV) console.log("Task error:", e);
+    alert("Failed to save task: " + JSON.stringify(e));
+  }
+
+  progress.remove();
 }
