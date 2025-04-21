@@ -1,0 +1,51 @@
+<h1 class="text-center my-4">Create New Task</h1>
+
+<form class="mb-5">
+  <!-- Task Title -->
+  <div class="mb-3">
+    <label for="input-title" class="form-label">Task Title</label>
+    <input id="input-title" name="title" type="text" class="form-control" required placeholder="Enter your task title">
+  </div>
+
+  <!-- Category -->
+  <div class="mb-3">
+    <label for="input-category" class="form-label">Category</label>
+    <input id="input-category" name="category" type="text" class="form-control" placeholder="e.g. School, Work, Personal">
+  </div>
+
+  <!-- Category Color -->
+  <div class="mb-3">
+    <label for="input-category-color" class="form-label">Category Color</label>
+    <input id="input-category-color" name="categoryColor" type="color" class="form-control form-control-color" value="#000000">
+  </div>
+
+  <!-- Due Date -->
+  <div class="mb-3">
+    <label for="input-due-date" class="form-label">Due Date</label>
+    <input id="input-due-date" name="dueDate" type="datetime-local" class="form-control" required>
+  </div>
+
+  <!-- Notes -->
+  <div class="mb-3">
+    <label for="input-notes" class="form-label">Notes</label>
+    <textarea id="input-notes" name="notes" rows="3" class="form-control" placeholder="Additional notes..."></textarea>
+  </div>
+
+  <!-- Is Completed -->
+  <div class="form-check mb-3">
+    <input id="input-completed" name="isCompleted" type="checkbox" class="form-check-input">
+    <label class="form-check-label" for="input-completed">Mark as Done</label>
+  </div>
+
+  <!-- Hidden field for editing existing task -->
+  <input id="input-doc-id" type="hidden">
+
+  <button type="submit" class="btn btn-primary">Add Task</button>
+</form>
+
+<!-- Search Bar -->
+<input id="search-bar" type="text" class="form-control mb-4" placeholder="Search tasks...">
+
+<!-- Container for task cards -->
+<div id="todo-container" class="d-flex flex-wrap gap-4"></div>
+
