@@ -1,0 +1,82 @@
+<!-- Sign-In Form -->
+<div class="container mt-5">
+  <div class="card border-0 shadow-lg" style="background: linear-gradient(145deg, #f0f4ff, #e0e7ff);">
+    <div class="card-body">
+      <h2 class="text-center mb-4 text-dark" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+        Welcome Back
+      </h2>
+      <form>
+        <!-- Email Field -->
+        <div class="mb-4">
+          <label for="email" class="form-label text-dark">Email Address</label>
+          <input name="email" required type="email" class="form-control form-control-lg rounded-pill shadow-sm"
+                 style="background: white; border: 2px solid #ced4da; padding: 15px; font-size: 1rem;">
+        </div>
+        <!-- Password Field -->
+        <div class="mb-4">
+          <label for="password" class="form-label text-dark">Password</label>
+          <input name="password" type="password" required minlength="6" class="form-control form-control-lg rounded-pill shadow-sm"
+                 style="background: white; border: 2px solid #ced4da; padding: 15px; font-size: 1rem;">
+        </div>
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary w-100 rounded-pill shadow-sm"
+                style="background: linear-gradient(90deg, #6a11cb, #2575fc); color: white; font-weight: 600; font-size: 1.2rem; border: none;">
+          Submit
+        </button>
+      </form>
+      <div class="text-center mt-3">
+        <!-- Trigger Button for Modal -->
+        <button id="create-new-user" class="btn btn-link text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#createUserModal"
+                style="font-size: 1rem; text-decoration: underline;">
+          Create New User
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Creating a New User -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="background: white; border-radius: 15px;">
+      <!-- Modal Header -->
+      <div class="modal-header" style="background: linear-gradient(90deg, #6a11cb, #2575fc); color: white;">
+        <h5 class="modal-title" id="createUserModalLabel" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+          Create New User
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <!-- Modal Form -->
+      <form id="create-user-form">
+        <div class="modal-body">
+          <!-- Email Input -->
+          <div class="mb-4">
+            <label for="new-user-email" class="form-label text-dark">Email Address</label>
+            <input type="email" class="form-control form-control-lg rounded-pill shadow-sm" id="new-user-email" required
+                   style="background: white; border: 2px solid #ced4da; padding: 15px; font-size: 1rem;">
+          </div>
+          <!-- Password Input -->
+          <div class="mb-4">
+            <label for="new-user-password" class="form-label text-dark">Password</label>
+            <input type="password" class="form-control form-control-lg rounded-pill shadow-sm" id="new-user-password" required minlength="6"
+                   style="background: white; border: 2px solid #ced4da; padding: 15px; font-size: 1rem;">
+          </div>
+        </div>
+        <div class="modal-footer" style="background: #f8f9fa; border-top: 2px solid #e9ecef;">
+          <button type="button" class="btn btn-secondary rounded-pill"
+                  style="background: #f1f3f5; color: #495057; font-weight: 600; border: none;">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary rounded-pill"
+                  style="background: linear-gradient(90deg, #6a11cb, #2575fc); color: white; font-weight: 600; border: none;">
+            Create Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
