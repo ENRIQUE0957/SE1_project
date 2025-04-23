@@ -17,6 +17,7 @@ import { auth } from "../firebase/firebaseConfig.js";
 
 
 
+
 const db = getFirestore(app); // Initialize Firestore
 
 export let currentUser = null;

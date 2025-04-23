@@ -1,8 +1,8 @@
 import { root } from "./elements.js";
 import { currentUser } from "../controller/firebase_auth.js";
 import { protectedView } from "./protected_view.js";
-import { getToDoTitleList } from "../controller/firestore_controller.js";
-import { DEV } from "../model/constants.js";
+import { getTaskList } from "../controller/firestore_controller.js";
+
 
 export async function calendarPageView() {
   if (!currentUser) {
@@ -14,7 +14,6 @@ export async function calendarPageView() {
   try {
     taskList = await getToDoTitleList(currentUser.uid);
   } catch (e) {
-    if (DEV) console.log("Failed to get tasks:", e);
     alert("Could not load calendar view.");
     return;
   }
@@ -27,51 +26,78 @@ export async function calendarPageView() {
   header.classList.add("text-center", "mb-4");
   container.appendChild(header);
 
-  const tasksByDate = {};
+  const toggleGroup = document.createElement("div");
+  toggleGroup.classList.add("flex", "gap-4", "justify-center", "mb-4");
 
-  taskList.forEach(task => {
-    const dateStr = new Date(task.dueDate.toDate()).toDateString();
-    if (!tasksByDate[dateStr]) tasksByDate[dateStr] = [];
-    tasksByDate[dateStr].push(task);
+  const zoomLevels = ["Day", "Week", "Month", "Year"];
+  const currentZoom = { value: "Month" };
+
+  zoomLevels.forEach(level => {
+    const btn = document.createElement("button");
+    btn.textContent = level;
+    btn.classList.add("border", "px-4", "py-1", "rounded");
+    if (level === currentZoom.value) btn.classList.add("bg-gray-300");
+    btn.onclick = () => {
+      currentZoom.value = level;
+      renderTasks(taskList, currentZoom.value);
+    };
+    toggleGroup.appendChild(btn);
   });
 
-  Object.entries(tasksByDate).sort().forEach(([date, tasks]) => {
-    const section = document.createElement("div");
-    section.classList.add("mb-4");
+  const viewToggleBtn = document.createElement("button");
+  viewToggleBtn.textContent = "List View";
+  viewToggleBtn.classList.add("ml-4", "underline");
+  viewToggleBtn.onclick = () => {
+    renderTasks(taskList, currentZoom.value, true);
+  };
 
-    const dateHeading = document.createElement("h4");
-    dateHeading.textContent = date;
-    dateHeading.classList.add("text-primary");
-    section.appendChild(dateHeading);
+  toggleGroup.appendChild(viewToggleBtn);
+  container.appendChild(toggleGroup);
+
+  const output = document.createElement("div");
+  container.appendChild(output);
+
+  function renderTasks(tasks, zoom, listMode = false) {
+    output.innerHTML = "";
+    const grouped = {};
 
     tasks.forEach(task => {
-      const card = document.createElement("div");
-      card.classList.add("card", "mb-2", "p-3");
-      card.style.borderLeft = "8px solid " + task.categoryColor;
+      const date = new Date(task.dueDate);
+      let key;
+      if (zoom === "Day") key = date.toDateString();
+      else if (zoom === "Week") {
+        const firstDay = new Date(date);
+        firstDay.setDate(date.getDate() - date.getDay());
+        key = firstDay.toDateString();
+      } else if (zoom === "Month") key = date.toLocaleString("default", { month: "long", year: "numeric" });
+      else if (zoom === "Year") key = date.getFullYear().toString();
 
-      const title = document.createElement("h5");
-      title.classList.add("card-title");
-      title.textContent = task.taskTitle;
-
-      const notes = document.createElement("p");
-      notes.classList.add("card-text");
-      notes.innerHTML = "<strong>Notes:</strong> " + task.notes;
-
-      const category = document.createElement("p");
-      category.classList.add("card-text");
-      category.innerHTML = "<strong>Category:</strong> " + task.category;
-
-      const status = document.createElement("p");
-      status.classList.add("card-text");
-      status.innerHTML = "<strong>Status:</strong> " + (task.isCompleted ? "✅ Completed" : "❌ Incomplete");
-
-      card.append(title, notes, category, status);
-      section.appendChild(card);
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(task);
     });
 
-    container.appendChild(section);
-  });
+    Object.entries(grouped).forEach(([group, tasks]) => {
+      const section = document.createElement("div");
+      section.classList.add("mb-4");
 
+      const label = document.createElement("h3");
+      label.textContent = group;
+      label.classList.add("font-bold", "text-lg", "mb-2");
+      section.appendChild(label);
+
+      const ul = document.createElement("ul");
+      tasks.forEach(t => {
+        const li = document.createElement("li");
+        li.textContent = `${t.taskTitle} (${new Date(t.dueDate).toLocaleString()})`;
+        ul.appendChild(li);
+      });
+
+      section.appendChild(ul);
+      output.appendChild(section);
+    });
+  }
+
+  renderTasks(taskList, currentZoom.value);
   root.innerHTML = "";
   root.appendChild(container);
 }
