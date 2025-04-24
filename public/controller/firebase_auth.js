@@ -2,9 +2,10 @@
 
 import { 
     getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    onAuthStateChanged, signOut,
+    onAuthStateChanged, signOut, updateProfile,
     verifyBeforeUpdateEmail, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { app } from "./firebase_core.js";
 import { DEV } from "../model/constants.js";
@@ -13,9 +14,6 @@ import { signinPageView } from "../view/signin_page.js";
 import { routePathnames, routing } from "../controller/route_controller.js";
 import { userInfo } from "../view/elements.js";
 import { auth } from "../firebase/firebaseConfig.js";
-
-
-
 
 
 const db = getFirestore(app); // Initialize Firestore
@@ -96,18 +94,30 @@ function onAuthStateChangedListener(user) {
 
 // Function to create a new user
 
-
 export async function createNewUser(email, password, displayName) {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  currentUser = userCredential.user;
-
-  // 🆕 Set display name on Firebase Auth profile
-  if (displayName) {
-    await updateProfile(currentUser, { displayName });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      currentUser = userCredential.user;
+  
+      if (displayName) {
+        await updateProfile(currentUser, { displayName });
+      }
+  
+      alert("User account created successfully!");
+    } catch (error) {
+      console.error("Error creating user:", error);
+      if (error.code === "auth/email-already-in-use") {
+        alert("Error: Email is already in use.");
+      } else if (error.code === "auth/invalid-email") {
+        alert("Error: Invalid email format.");
+      } else if (error.code === "auth/weak-password") {
+        alert("Error: Password is too weak.");
+      } else {
+        alert("Error: " + error.message);
+      }
+    }
   }
-}
-
-
+  
 // Function to update the user's email
 export async function updateUserEmail(newEmail) {
     if (!currentUser) {

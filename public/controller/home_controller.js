@@ -3,7 +3,7 @@ import { Task } from "../model/Task.js";
 import { currentUser } from "./firebase_auth.js";
 import { addTask, updateTask, deleteTask } from "./firestore_controller.js";
 import { progressMessage } from "../view/progress_message.js";
-import { buildCard } from "../view/home_page.js";
+import { homePageView } from "../view/home_page.js";
 
 const categoryColorMap = {
   Work: "#007bff",
@@ -20,6 +20,7 @@ export async function onSubmitCreateForm(e) {
   const category = form.category.value || 'Other';
   const categoryColor = categoryColorMap[category] || "#000000";
   const dueDateValue = form.dueDate.value;
+  const reminderTimeValue = form.reminderTime?.value;
   const notes = form.notes.value || '';
   const isCompleted = form.isCompleted.checked;
   const docId = form["docId"].value;
@@ -39,6 +40,9 @@ export async function onSubmitCreateForm(e) {
     categoryColor,
     isCompleted,
     notes,
+    reminderTime: reminderTimeValue ? new Date(reminderTimeValue) : null,
+    reminderSent: false,
+    userEmail: currentUser.email, // ✅ needed for email sending
   };
 
   const progress = progressMessage(docId ? "Updating..." : "Creating...");
@@ -54,17 +58,28 @@ export async function onSubmitCreateForm(e) {
       task = new Task({ ...taskData }, newId);
     }
 
-    const container = document.getElementById("todo-container");
-    container.prepend(buildCard(task));
     form.reset();
     form["docId"].value = "";
+
+    await homePageView();
   } catch (e) {
-    if (DEV) console.log("Task error:", e);
-    alert("Failed to save task: " + JSON.stringify(e));
+    console.error("Task error:", e);
+
+    let message = "Unknown error.";
+    if (e instanceof Error) {
+      message = e.message;
+    } else if (typeof e === "string") {
+      message = e;
+    } else if (typeof e === "object") {
+      message = JSON.stringify(e, null, 2);
+    }
+
+    alert("Failed to save task:\n" + message);
   }
 
   progress.remove();
 }
+
 
 export async function updateTaskInline(task) {
   try {

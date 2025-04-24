@@ -27,16 +27,41 @@ export async function getTaskList(userId) {
 }
 
 export async function addTask(taskData) {
-  taskData.taskTitle = taskData.taskTitle.trim();
-  taskData.createdAt = Timestamp.fromDate(new Date(taskData.createdAt));
-  taskData.updatedAt = Timestamp.fromDate(new Date(taskData.updatedAt));
-  taskData.dueDate = Timestamp.fromDate(new Date(taskData.dueDate));
+  taskData.taskTitle = taskData.taskTitle?.trim() || "Untitled";
+
+  // 💡 Only convert if valid Date
+  if (taskData.createdAt instanceof Date && !isNaN(taskData.createdAt)) {
+    taskData.createdAt = Timestamp.fromDate(taskData.createdAt);
+  } else {
+    taskData.createdAt = Timestamp.now();
+  }
+
+  if (taskData.updatedAt instanceof Date && !isNaN(taskData.updatedAt)) {
+    taskData.updatedAt = Timestamp.fromDate(taskData.updatedAt);
+  } else {
+    taskData.updatedAt = Timestamp.now();
+  }
+
+  if (taskData.dueDate instanceof Date && !isNaN(taskData.dueDate)) {
+    taskData.dueDate = Timestamp.fromDate(taskData.dueDate);
+  } else {
+    throw new Error("Invalid due date");
+  }
+
+  if (taskData.reminderTime instanceof Date && !isNaN(taskData.reminderTime)) {
+    taskData.reminderTime = Timestamp.fromDate(taskData.reminderTime);
+  } else {
+    taskData.reminderTime = null;
+  }
+  taskData.reminderSent = false;
+
   const docRef = await addDoc(collection(db, "ToDo"), taskData);
   return docRef.id;
 }
 
 export async function updateTask(task) {
   const docRef = doc(db, "ToDo", task.docId);
+
   const data = {
     taskTitle: task.taskTitle.trim(),
     updatedAt: Timestamp.fromDate(new Date()),
@@ -44,10 +69,16 @@ export async function updateTask(task) {
     notes: task.notes || "",
     isCompleted: task.isCompleted || false,
     category: task.category,
-    categoryColor: task.categoryColor || "#000000"
+    categoryColor: task.categoryColor || "#000000",
+    reminderTime: task.reminderTime instanceof Date && !isNaN(task.reminderTime)
+      ? Timestamp.fromDate(task.reminderTime)
+      : null,
+    reminderSent: false,
   };
+
   await updateDoc(docRef, data);
 }
+
 
 export async function deleteTask(docId) {
   const ref = doc(db, "ToDo", docId);

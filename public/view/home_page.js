@@ -53,15 +53,64 @@ function renderFilteredTasks(searchTerm, container) {
   const term = searchTerm.toLowerCase().trim();
   container.innerHTML = "";
 
-  const filtered = allTasks.filter(task =>
-    task.taskTitle.toLowerCase().includes(term) ||
-    task.category.toLowerCase().includes(term)
-  );
+  const now = new Date();
 
-  filtered.forEach(task => {
-    container.appendChild(buildCard(task));
+  const filtered = allTasks.filter(task => {
+    // 🔄 Handle Firestore Timestamp or string or Date
+    let taskDateRaw = task.dueDate;
+    if (taskDateRaw?.toDate) {
+      taskDateRaw = taskDateRaw.toDate(); // Firestore Timestamp → Date
+    }
+
+    const taskDate = new Date(taskDateRaw);
+    const taskDateStr = !isNaN(taskDate.getTime()) ? taskDate.toISOString().slice(0, 10) : null;
+
+    // 🧠 Default match by text
+    let matches = task.taskTitle.toLowerCase().includes(term) ||
+                  task.category.toLowerCase().includes(term);
+
+    // 📅 Match exact YYYY-MM-DD format
+    if (term.match(/\b\d{4}-\d{2}-\d{2}\b/) && taskDateStr) {
+      matches = taskDateStr === term;
+    }
+
+    // 📅 Match natural date string (e.g. April 26, 2025)
+    const parsedDate = new Date(term);
+    if (parsedDate instanceof Date && !isNaN(parsedDate.getTime()) && taskDateStr) {
+      const parsedDateStr = parsedDate.toISOString().slice(0, 10);
+      matches = taskDateStr === parsedDateStr;
+    }
+
+    // 📆 due: next X days
+    const dueMatch = term.match(/due:\s*next\s*(\d+)\s*days?/);
+    if (dueMatch && taskDateStr) {
+      const days = parseInt(dueMatch[1]);
+      const rangeEnd = new Date(now);
+      rangeEnd.setDate(now.getDate() + days);
+      const taskDateOnly = new Date(taskDateStr);
+      taskDateOnly.setHours(0, 0, 0, 0);
+      matches = taskDateOnly >= now && taskDateOnly <= rangeEnd;
+    }
+
+    // 📅 due: today
+    if (term === "due: today" && taskDateStr) {
+      matches = taskDateStr === now.toISOString().slice(0, 10);
+    }
+
+    // 📅 due: tomorrow
+    if (term === "due: tomorrow" && taskDateStr) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      matches = taskDateStr === tomorrow.toISOString().slice(0, 10);
+    }
+
+    return matches;
   });
+
+  filtered.forEach(task => container.appendChild(buildCard(task)));
 }
+
+
 
 function setupSearchFeature(container) {
   const searchBar = document.getElementById("task-search");
