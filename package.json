@@ -1,0 +1,26 @@
+{
+  "name": "se1_project-main",
+  "version": "1.0.0",
+  "description": "### Introduction This project is designed to streamline the management of schedules and reminders. In today's fast-paced world, individuals are overwhelmed with numerous responsibilities and appointments, from vehicle maintenance tasks, such as annual registration, oil changes, and tire rotations, to personal commitments including dental check-ups, physical examinations, and children's appointments. We aim to develop a comprehensive system that centralizes schedule management, enabling users to categorize tasks, create specific items within each category, set reminders, and easily query upcoming events.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshuachoi01/SE1_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshuachoi01/SE1_project/issues"
+  },
+  "homepage": "https://github.com/joshuachoi01/SE1_project#readme",
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
+    "dotenv": "^16.5.0",
+    "firebase-admin": "^13.3.0",
+    "nodemailer": "^6.10.1"
+  }
+}

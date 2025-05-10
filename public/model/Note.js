@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { db } from '../firebase_core.js';
 import { collectionNames, fieldNames } from './constants.js';
 

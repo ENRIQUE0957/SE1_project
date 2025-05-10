@@ -17,7 +17,6 @@ export async function onClickCreateUser(e) {
 
     try {
       await createNewUser(email, password, displayName);
-      alert('User account created successfully!');
       modal.hide();
       resetBodyStyles();
     } catch (error) {

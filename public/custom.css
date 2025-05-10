@@ -119,6 +119,7 @@ body.dark-mode div[id="user-info-popup"] button {
   transform: scale(1.05) !important;
 }
 
+
 #user-info-popup button:nth-child(2):before {
   content: "" !important;
   position: absolute !important;

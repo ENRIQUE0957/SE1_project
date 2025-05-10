@@ -1,51 +1,55 @@
-<h1 class="text-center my-4">Create New Task</h1>
+<div class="container py-4">
+  <div class="row mb-4">
+    <!-- Left Column: Form -->
+    <div class="col-lg-5 col-md-6">
+      <h2>Create Task</h2>
+      <form>
+        <div class="mb-3">
+          <label for="input-title" class="form-label">Task Title</label>
+          <input id="input-title" name="title" type="text" class="form-control" required>
+        </div>
 
-<form class="mb-5">
-  <!-- Task Title -->
-  <div class="mb-3">
-    <label for="input-title" class="form-label">Task Title</label>
-    <input id="input-title" name="title" type="text" class="form-control" required placeholder="Enter your task title">
+        <div class="mb-3">
+          <label for="input-category" class="form-label">Category</label>
+          <select id="input-category" name="category" class="form-control" required>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="School">School</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="input-due-date" class="form-label">Due Date</label>
+          <input id="input-due-date" name="dueDate" type="datetime-local" class="form-control" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="input-reminder-time" class="form-label">Reminder Time</label>
+          <input id="input-reminder-time" name="reminderTime" type="datetime-local" class="form-control">
+        </div>        
+
+        <div class="mb-3">
+          <label for="input-notes" class="form-label">Notes</label>
+          <textarea id="input-notes" name="notes" rows="3" class="form-control"></textarea>
+        </div>
+
+        <div class="form-check mb-3">
+          <input id="input-completed" name="isCompleted" type="checkbox" class="form-check-input">
+          <label class="form-check-label" for="input-completed">Mark as Done</label>
+        </div>
+
+        <input id="input-doc-id" name="docId" type="hidden">
+        <button type="submit" class="btn btn-primary">Save Task</button>
+      </form>
+    </div>
+
+    <!-- Right Column: Search + Scrollable Task List -->
+    <div class="col-lg-6 col-md-6 offset-lg-1">
+      <input id="task-search" type="text" class="form-control mb-3" placeholder="Search tasks...">
+      <div id="todo-scroll-box" style="max-height: 70vh; overflow-y: auto; padding-right: 8px; border: 1px solid #ccc; border-radius: 8px; background-color: #fff;">
+        <div id="todo-container" class="d-flex flex-column gap-3 p-2"></div>
+      </div>
+    </div>
   </div>
-
-  <!-- Category -->
-  <div class="mb-3">
-    <label for="input-category" class="form-label">Category</label>
-    <input id="input-category" name="category" type="text" class="form-control" placeholder="e.g. School, Work, Personal">
-  </div>
-
-  <!-- Category Color -->
-  <div class="mb-3">
-    <label for="input-category-color" class="form-label">Category Color</label>
-    <input id="input-category-color" name="categoryColor" type="color" class="form-control form-control-color" value="#000000">
-  </div>
-
-  <!-- Due Date -->
-  <div class="mb-3">
-    <label for="input-due-date" class="form-label">Due Date</label>
-    <input id="input-due-date" name="dueDate" type="datetime-local" class="form-control" required>
-  </div>
-
-  <!-- Notes -->
-  <div class="mb-3">
-    <label for="input-notes" class="form-label">Notes</label>
-    <textarea id="input-notes" name="notes" rows="3" class="form-control" placeholder="Additional notes..."></textarea>
-  </div>
-
-  <!-- Is Completed -->
-  <div class="form-check mb-3">
-    <input id="input-completed" name="isCompleted" type="checkbox" class="form-check-input">
-    <label class="form-check-label" for="input-completed">Mark as Done</label>
-  </div>
-
-  <!-- Hidden field for editing existing task -->
-  <input id="input-doc-id" type="hidden">
-
-  <button type="submit" class="btn btn-primary">Add Task</button>
-</form>
-
-<!-- Search Bar -->
-<input id="search-bar" type="text" class="form-control mb-4" placeholder="Search tasks...">
-
-<!-- Container for task cards -->
-<div id="todo-container" class="d-flex flex-wrap gap-4"></div>
-
+</div>
